@@ -10,7 +10,16 @@ let usuarioSchema = new Schema({
         type: Array,
     },
     quantity: {
-        type: Number,
+        type: Number
+    },
+    avrg: {
+        type: Number
+    },
+    maximun: {
+        type: Number
+    },
+    min: {
+        type: Number
     }
 
 

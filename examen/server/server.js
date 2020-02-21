@@ -14,13 +14,12 @@ app.use(bodyParser.json())
 
 
 
-app.get('/upload/:id', function(req, res) {
+app.get('/usuario/:id', function(req, res) {
 
     let id = req.params.id
 
     let body = req.body;
-    let suma = sum(body.numbers);
-    let averge = (suma / length(body.numbers))
+
     if (id === "" || id === undefined) {
         return res.status(400).json({
 
@@ -52,17 +51,15 @@ app.get('/upload/:id', function(req, res) {
                     });
                 } else {
                     let user = new Usuario({
-                        numbers: body.numbers,
-                        quantity: body.quantity
+                        avrg: userBD.avrg,
+                        maximun: userBD.maximun,
+                        min: userBD.min
                     });
 
                     res.json({
                         status: 200,
                         message: "id encontrada",
-                        data: user,
-                        maximun: max(body.numbers),
-                        averge: averge,
-                        minimun: min(body.numbers),
+                        data: userBD,
                         success: "SUCCESS!"
                     });
                 }
@@ -76,13 +73,12 @@ app.get('/upload/:id', function(req, res) {
 
 
 
-app.post('/upload', function(req, res) {
+app.post('/usuario', function(req, res) {
 
     let body = req.body;
-    let suma = sum(body.numbers);
-    let averge = (suma / length(body.numbers))
 
-    if (body.quantity === length(body.numbers)) {
+
+    if (body.quantity === body.numbers.lengt) {
         res.status(400).json({
             ok: false,
             mensaje: 'quanity must be equl to length of numbers'
@@ -90,8 +86,10 @@ app.post('/upload', function(req, res) {
     } else {
 
         let user = new Usuario({
-            numbers: body.numbers,
-            quantity: body.quantity
+            quantity: body.quantity,
+            avrg: body.avrg,
+            maximun: body.maximun,
+            min: body.min
         });
         user.save((err, userBd) => {
 
@@ -99,7 +97,8 @@ app.post('/upload', function(req, res) {
                 return res.status(500).json({
                     status: 500,
                     messege: err,
-                    data: userBd,
+                    data: userBD,
+
                     success: "FAIL"
 
                 });
@@ -109,9 +108,6 @@ app.post('/upload', function(req, res) {
                 status: 200,
                 message: "Usuario creado",
                 data: userBd,
-                maximun: max(body.numbers),
-                averge: averge,
-                minimun: min(body.numbers),
                 success: "SUCCESS!"
             });
         });
