@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const Usuario = require('./modelos/models')
+const _ = require('underscore');
 
 
 // parse application/x-www-form-urlencoded
@@ -14,19 +15,15 @@ app.use(bodyParser.json())
 
 
 
-app.get('/usuario/:id', function(req, res) {
+app.get('/meassures/:id', function(req, res) {
 
     let id = req.params.id
-
-    let body = req.body;
 
     if (id === "" || id === undefined) {
         return res.status(400).json({
 
             status: 400,
-            message: "id no válido",
-            data: userBD,
-            success: "FAIL!"
+            message: "id no válido"
 
         });
     } else {
@@ -35,86 +32,96 @@ app.get('/usuario/:id', function(req, res) {
 
                 if (err) {
                     return res.status(500).json({
-                        status: 500,
-                        message: err,
-                        data: userBD,
-                        success: "FAIL!"
+                        message: "Error en la base de datos",
+                        error: err
                     });
                 }
 
-                if (userBD.length === 0) {
+                if (userBD === null || userBD.length === 0) {
                     return res.status(404).json({
-                        status: 404,
-                        message: "Usuario no encontrando",
-                        data: userBD,
-                        success: "FAIL!"
+                        message: "ID incorrecto"
                     });
                 } else {
-                    let user = new Usuario({
-                        avrg: userBD.avrg,
-                        maximun: userBD.maximun,
-                        min: userBD.min
-                    });
-
                     res.json({
-                        status: 200,
-                        message: "id encontrada",
-                        data: userBD,
-                        success: "SUCCESS!"
+                        average: userBD.avrg,
+                        minimun: userBD.min,
+                        maximun: userBD.maximun
                     });
                 }
             })
-
-
     }
-
 
 });
 
 
 
-app.post('/usuario', function(req, res) {
+app.post('/upload', function(req, res) {
 
     let body = req.body;
-
-
-    if (body.quantity === body.numbers.lengt) {
+    let negativo = false;
+    body.numbers.forEach(element => {
+        if (element < 0) {
+            negativo = true;
+        }
+    });
+    if (negativo) {
+        res.status(400).json({
+            mensaje: 'todos lo nuemros deben ser positivos'
+        })
+    }
+    if (body.quantity != body.numbers.length) {
         res.status(400).json({
             ok: false,
-            mensaje: 'quanity must be equl to length of numbers'
+            mensaje: 'quanity must be equal to length of numbers'
         });
     } else {
 
-        let user = new Usuario({
-            quantity: body.quantity,
-            avrg: body.avrg,
-            maximun: body.maximun,
-            min: body.min
+        let sumatoria = 0;
+        let min = body.numbers[0];
+        let max = body.numbers[0];
+
+        body.numbers.forEach(element => {
+            sumatoria = sumatoria + element;
+
+            if (element < min) {
+                min = element;
+            }
+
+            if (element > max) {
+                max = element;
+            }
         });
+
+        let promedio = sumatoria / body.quantity;
+
+        let user = new Usuario({
+            _id: body.id,
+            numbers: body.numbers,
+            quantity: body.quantity,
+            avrg: promedio,
+            maximun: max,
+            min: min
+        });
+
         user.save((err, userBd) => {
 
             if (err) {
                 return res.status(500).json({
-                    status: 500,
-                    messege: err,
-                    data: userBD,
-
-                    success: "FAIL"
+                    message: "La información no se guardó",
+                    error: err
 
                 });
             }
 
             res.json({
-                status: 200,
-                message: "Usuario creado",
-                data: userBd,
-                success: "SUCCESS!"
+                message: "La información fue guardada exitosamente",
+                average: promedio,
+                minimun: min,
+                maximun: max
             });
         });
 
     }
-
-
 
 })
 

@@ -6,6 +6,9 @@ let Schema = mongoose.Schema;
 
 
 let usuarioSchema = new Schema({
+    _id: {
+        type: String
+    },
     numbers: {
         type: Array,
     },
@@ -21,7 +24,6 @@ let usuarioSchema = new Schema({
     min: {
         type: Number
     }
-
 
 });
 
